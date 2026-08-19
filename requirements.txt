@@ -1,0 +1,17 @@
+# P1 (retrieval) dependencies. Later phases append langgraph, langchain-groq, streamlit,
+# arize-phoenix -- deliberately not installed yet, so an import error tells you the truth
+# about what this phase actually depends on.
+
+# Vector store. Pinned wide, but the cosine-space setting moved between majors, so if a
+# `configuration=` TypeError shows up, that is what src/retrieval/vector_store.py handles.
+chromadb>=0.5.5,<2.0
+
+# Local embeddings: BAAI/bge-small-en-v1.5, 384-dim, 512-token window.
+# NOTE: this pulls in torch (~2 GB on Windows/CPU). It is the single largest install in the
+# project and the reason embeddings are local and free rather than an API call.
+sentence-transformers>=3.0,<6.0
+
+PyYAML>=6.0
+
+# tests only
+pytest>=8.0

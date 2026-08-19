@@ -216,3 +216,13 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# --- capstone: build artefacts that must never be committed ---
+# The vector index is derived data: rebuilt from data/knowledge_base in seconds by
+# scripts/build_index.py. Committing it means binary diffs and a stale index on every pull.
+.chroma/
+# On-disk LLM response cache (P2+), keyed by sha256(model, prompt, temperature, schema).
+.cache/
+# Generated drafts, audit logs and eval reports.
+outputs/
+!outputs/.gitkeep

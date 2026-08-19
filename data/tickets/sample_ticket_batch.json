@@ -1,0 +1,632 @@
+{
+  "dataset": "northgate_support_tickets_sample",
+  "version": "1.0.0",
+  "synthetic": true,
+  "purpose": "Small hand-picked batch for development runs. Covers all four routes, both difficulty levels, the no-policy-found path, the safety path, and the angry-but-eligible case that tone-based routers get wrong.",
+  "parent_dataset": "data/tickets/synthetic_tickets.json",
+  "record_count": 13,
+  "tickets": [
+    {
+      "ticket_id": "TCK-1143",
+      "customer_id": "CUST-0001",
+      "subject": "Overdraft fee from last Tuesday",
+      "message": "Hi,\n\nI got hit with a $35 overdraft fee on 8/4. My rent auto-payment cleared the same morning my paycheck was supposed to land and the paycheck came in about six hours later. I've been with Northgate since 2019 and I don't think I've ever asked for anything like this before. Is there any chance the fee can be refunded?\n\nThanks,\nDaniel",
+      "conversation_history": [],
+      "priority": "medium",
+      "created_at": "2026-08-11T14:08:00-07:00",
+      "channel": "phone_transcript_summary",
+      "language": "en",
+      "locale": "en-US",
+      "category": "disputes_and_fees",
+      "product_area": "checking",
+      "queue": "Claims & Disputes",
+      "status": "new",
+      "tags": [
+        "overdraft_fee",
+        "courtesy_reversal"
+      ],
+      "attachments": [],
+      "customer": {
+        "name": "Rosa Abbott",
+        "email_masked": "rabbo***@yahoo.com",
+        "phone_masked": "(***) ***-9752"
+      },
+      "customer_context": {
+        "segment": "Consumer",
+        "state": "NC",
+        "tenure_months": 79,
+        "relationship_products": [
+          "Everyday Checking",
+          "Debit Card"
+        ],
+        "masked_account": "****3221",
+        "kyc_verified": true,
+        "prior_tickets_90d": 0,
+        "prior_fee_reversals_12m": 0,
+        "prior_disputes_12m": 0
+      },
+      "related_tickets": [],
+      "sla": {
+        "first_response_due_at": "2026-08-11T22:08:00-07:00",
+        "resolution_due_at": "2026-08-13T14:08:00-07:00"
+      },
+      "source_system": "NorthgateCare/CRM-export-v3"
+    },
+    {
+      "ticket_id": "TCK-1071",
+      "customer_id": "CUST-0063",
+      "subject": "Locked out of online banking",
+      "message": "I typed my password wrong a few times this morning and now it says my account is locked. I need to get in to pay a bill today. How long am I locked out for?",
+      "conversation_history": [],
+      "priority": "medium",
+      "created_at": "2026-07-24T09:00:00-07:00",
+      "channel": "secure_message",
+      "language": "en",
+      "locale": "en-US",
+      "category": "digital_access",
+      "product_area": "online_banking",
+      "queue": "Digital Support",
+      "status": "new",
+      "tags": [
+        "lockout",
+        "failed_signin"
+      ],
+      "attachments": [],
+      "customer": {
+        "name": "Hector Fairbanks",
+        "email_masked": "hfair***@proton.me",
+        "phone_masked": "(***) ***-6588"
+      },
+      "customer_context": {
+        "segment": "Student",
+        "state": "FL",
+        "tenure_months": 14,
+        "relationship_products": [
+          "Campus Checking",
+          "Way2Save Savings",
+          "Debit Card"
+        ],
+        "masked_account": "****4708",
+        "kyc_verified": true,
+        "prior_tickets_90d": 3,
+        "prior_fee_reversals_12m": 1,
+        "prior_disputes_12m": 0
+      },
+      "related_tickets": [],
+      "sla": {
+        "first_response_due_at": "2026-07-24T17:00:00-07:00",
+        "resolution_due_at": "2026-07-26T09:00:00-07:00"
+      },
+      "source_system": "NorthgateCare/CRM-export-v3"
+    },
+    {
+      "ticket_id": "TCK-1022",
+      "customer_id": "CUST-0100",
+      "subject": "charged twice at the restaurant",
+      "message": "Harbor Grill hit me for $94 and then $112.80 for the same dinner on Friday. One of them still has that little clock icon next to it. Take the extra one off please.",
+      "conversation_history": [],
+      "priority": "medium",
+      "created_at": "2026-07-11T01:10:00-07:00",
+      "channel": "app_feedback",
+      "language": "en",
+      "locale": "en-US",
+      "category": "payments_troubleshooting",
+      "product_area": "debit_card",
+      "queue": "Payments Support",
+      "status": "new",
+      "tags": [
+        "pending_vs_posted",
+        "tip_authorization"
+      ],
+      "attachments": [],
+      "customer": {
+        "name": "Simone Okafor",
+        "email_masked": "sokaf***@yahoo.com",
+        "phone_masked": "(***) ***-9586"
+      },
+      "customer_context": {
+        "segment": "Consumer",
+        "state": "NY",
+        "tenure_months": 61,
+        "relationship_products": [
+          "Basic Access Checking",
+          "Debit Card"
+        ],
+        "masked_account": "****2114",
+        "kyc_verified": true,
+        "prior_tickets_90d": 2,
+        "prior_fee_reversals_12m": 0,
+        "prior_disputes_12m": 0
+      },
+      "related_tickets": [],
+      "sla": {
+        "first_response_due_at": "2026-07-11T09:10:00-07:00",
+        "resolution_due_at": "2026-07-13T01:10:00-07:00"
+      },
+      "source_system": "NorthgateCare/CRM-export-v3"
+    },
+    {
+      "ticket_id": "TCK-1149",
+      "customer_id": "CUST-0127",
+      "subject": "THIS IS ABSOLUTE GARBAGE",
+      "message": "THIRTY FIVE DOLLARS for being overdrawn by $4.12 for SIX HOURS. Six hours! Are you kidding me. This is predatory and everyone knows it. The fee posted on 8/8. I have never asked you for anything in the six years I've been here. Reverse it or I'm walking.",
+      "conversation_history": [],
+      "priority": "high",
+      "created_at": "2026-08-12T10:24:00-07:00",
+      "channel": "phone_transcript_summary",
+      "language": "en",
+      "locale": "en-US",
+      "category": "conduct_and_prohibited",
+      "product_area": "checking",
+      "queue": "Customer Care General",
+      "status": "new",
+      "tags": [
+        "overdraft_fee",
+        "hostile_tone",
+        "courtesy_reversal"
+      ],
+      "attachments": [],
+      "customer": {
+        "name": "Beatriz Janssen",
+        "email_masked": "bjans***@icloud.com",
+        "phone_masked": "(***) ***-8824"
+      },
+      "customer_context": {
+        "segment": "Consumer",
+        "state": "TX",
+        "tenure_months": 74,
+        "relationship_products": [
+          "Everyday Checking",
+          "Way2Save Savings",
+          "Debit Card",
+          "30-Year Fixed Mortgage"
+        ],
+        "masked_account": "****1108",
+        "kyc_verified": true,
+        "prior_tickets_90d": 3,
+        "prior_fee_reversals_12m": 0,
+        "prior_disputes_12m": 2
+      },
+      "related_tickets": [],
+      "sla": {
+        "first_response_due_at": "2026-08-12T14:24:00-07:00",
+        "resolution_due_at": "2026-08-13T10:24:00-07:00"
+      },
+      "source_system": "NorthgateCare/CRM-export-v3"
+    },
+    {
+      "ticket_id": "TCK-1147",
+      "customer_id": "CUST-0015",
+      "subject": "Second overdraft fee this year, need help",
+      "message": "I know you refunded a fee for me back in March and I appreciated it. I've got another $70 in overdraft fees from 8/6 and 8/7. My hours got cut at work in June and I'm genuinely underwater right now. I'm not trying to game anything, I just need a break this once.",
+      "conversation_history": [],
+      "priority": "high",
+      "created_at": "2026-08-12T07:30:00-07:00",
+      "channel": "secure_message",
+      "language": "en",
+      "locale": "en-US",
+      "category": "disputes_and_fees",
+      "product_area": "checking",
+      "queue": "Claims & Disputes",
+      "status": "new",
+      "tags": [
+        "overdraft_fee",
+        "repeat_reversal",
+        "hardship"
+      ],
+      "attachments": [],
+      "customer": {
+        "name": "Xavier Bhatt",
+        "email_masked": "xbhat***@yahoo.com",
+        "phone_masked": "(***) ***-8149"
+      },
+      "customer_context": {
+        "segment": "Consumer",
+        "state": "MN",
+        "tenure_months": 14,
+        "relationship_products": [
+          "Basic Access Checking",
+          "Debit Card"
+        ],
+        "masked_account": "****2111",
+        "kyc_verified": true,
+        "prior_tickets_90d": 2,
+        "prior_fee_reversals_12m": 1,
+        "prior_disputes_12m": 1
+      },
+      "related_tickets": [],
+      "sla": {
+        "first_response_due_at": "2026-08-12T11:30:00-07:00",
+        "resolution_due_at": "2026-08-13T07:30:00-07:00"
+      },
+      "source_system": "NorthgateCare/CRM-export-v3"
+    },
+    {
+      "ticket_id": "TCK-1064",
+      "customer_id": "CUST-0076",
+      "subject": "can't log in and my email was changed",
+      "message": "My password stopped working yesterday. I tried to reset it and the reset went to an email address I don't recognize - something at protonmail. My real email is the gmail one you've always had. I don't know what's happening.",
+      "conversation_history": [],
+      "priority": "urgent",
+      "created_at": "2026-07-23T08:03:00-07:00",
+      "channel": "chat",
+      "language": "en",
+      "locale": "en-US",
+      "category": "digital_access",
+      "product_area": "online_banking",
+      "queue": "Digital Support",
+      "status": "new",
+      "tags": [
+        "account_takeover",
+        "recovery_channel_compromised"
+      ],
+      "attachments": [
+        {
+          "file_name": "merchant_correspondence.pdf",
+          "content_type": "application/pdf",
+          "size_kb": 243,
+          "scanned": true
+        }
+      ],
+      "customer": {
+        "name": "Emmett Sackett",
+        "email_masked": "esack***@gmail.com",
+        "phone_masked": "(***) ***-4478"
+      },
+      "customer_context": {
+        "segment": "Consumer",
+        "state": "NY",
+        "tenure_months": 36,
+        "relationship_products": [
+          "Everyday Checking",
+          "Debit Card",
+          "18-Month CD"
+        ],
+        "masked_account": "****4142",
+        "kyc_verified": true,
+        "prior_tickets_90d": 0,
+        "prior_fee_reversals_12m": 0,
+        "prior_disputes_12m": 0
+      },
+      "related_tickets": [],
+      "sla": {
+        "first_response_due_at": "2026-07-23T09:03:00-07:00",
+        "resolution_due_at": "2026-07-23T16:03:00-07:00"
+      },
+      "source_system": "NorthgateCare/CRM-export-v3"
+    },
+    {
+      "ticket_id": "TCK-1041",
+      "customer_id": "CUST-0026",
+      "subject": "Mortgage escrow refund",
+      "message": "My escrow analysis says I have a $1,840 surplus and the letter says a refund check goes out within 30 days. That was 41 days ago. Where is it? Loan number ends 7729.",
+      "conversation_history": [],
+      "priority": "medium",
+      "created_at": "2026-07-16T20:57:00-07:00",
+      "channel": "secure_message",
+      "language": "en",
+      "locale": "en-US",
+      "category": "disputes_and_fees",
+      "product_area": "mortgage",
+      "queue": "Claims & Disputes",
+      "status": "new",
+      "tags": [
+        "out_of_scope",
+        "no_policy_found",
+        "escrow"
+      ],
+      "attachments": [],
+      "customer": {
+        "name": "Marcus Sackett",
+        "email_masked": "msack***@outlook.com",
+        "phone_masked": "(***) ***-6450"
+      },
+      "customer_context": {
+        "segment": "Premier",
+        "state": "NV",
+        "tenure_months": 210,
+        "relationship_products": [
+          "Premier Checking",
+          "Premier Savings",
+          "Debit Card",
+          "Bill Pay"
+        ],
+        "masked_account": "****7831",
+        "kyc_verified": true,
+        "prior_tickets_90d": 1,
+        "prior_fee_reversals_12m": 1,
+        "prior_disputes_12m": 0
+      },
+      "related_tickets": [],
+      "sla": {
+        "first_response_due_at": "2026-07-17T04:57:00-07:00",
+        "resolution_due_at": "2026-07-18T20:57:00-07:00"
+      },
+      "source_system": "NorthgateCare/CRM-export-v3"
+    },
+    {
+      "ticket_id": "TCK-1088",
+      "customer_id": "CUST-0019",
+      "subject": "I think I was scammed",
+      "message": "Someone called me yesterday saying they were from the Northgate fraud department. They knew my name and the last four of my card. They said there was a fraudulent charge and to \"move my money to a safe account\" using Zelle while they stayed on the line. I sent three payments, $1,500, $2,000 and $1,200. I realize now it wasn't you. I feel sick. What do I do.",
+      "conversation_history": [],
+      "priority": "urgent",
+      "created_at": "2026-07-30T17:19:00-07:00",
+      "channel": "chat",
+      "language": "en",
+      "locale": "en-US",
+      "category": "disputes_and_fees",
+      "product_area": "zelle",
+      "queue": "Claims & Disputes",
+      "status": "new",
+      "tags": [
+        "scam",
+        "imposter",
+        "fraud_investigation"
+      ],
+      "attachments": [],
+      "customer": {
+        "name": "Yusuf Sandoval",
+        "email_masked": "ysand***@proton.me",
+        "phone_masked": "(***) ***-2929"
+      },
+      "customer_context": {
+        "segment": "Consumer",
+        "state": "MN",
+        "tenure_months": 44,
+        "relationship_products": [
+          "Everyday Checking",
+          "Debit Card",
+          "18-Month CD"
+        ],
+        "masked_account": "****1537",
+        "kyc_verified": true,
+        "prior_tickets_90d": 0,
+        "prior_fee_reversals_12m": 0,
+        "prior_disputes_12m": 0
+      },
+      "related_tickets": [],
+      "sla": {
+        "first_response_due_at": "2026-07-30T18:19:00-07:00",
+        "resolution_due_at": "2026-07-31T01:19:00-07:00"
+      },
+      "source_system": "NorthgateCare/CRM-export-v3"
+    },
+    {
+      "ticket_id": "TCK-1083",
+      "customer_id": "CUST-0131",
+      "subject": "there's no point anymore",
+      "message": "My account is overdrawn, my car got repossessed last week and I lost my job in June. The $175 in fees you took was the last money I had. I honestly don't see a point in any of this anymore. I'm not asking for sympathy, I just wanted someone to know what these fees do to people.",
+      "conversation_history": [],
+      "priority": "urgent",
+      "created_at": "2026-07-29T07:15:00-07:00",
+      "channel": "secure_message",
+      "language": "en",
+      "locale": "en-US",
+      "category": "conduct_and_prohibited",
+      "product_area": "checking",
+      "queue": "Customer Care General",
+      "status": "new",
+      "tags": [
+        "self_harm_indicator",
+        "vulnerable_customer",
+        "hardship"
+      ],
+      "attachments": [],
+      "customer": {
+        "name": "Omar Deleon",
+        "email_masked": "odele***@gmail.com",
+        "phone_masked": "(***) ***-1274"
+      },
+      "customer_context": {
+        "segment": "Consumer",
+        "state": "NY",
+        "tenure_months": 28,
+        "relationship_products": [
+          "Everyday Checking",
+          "Debit Card",
+          "18-Month CD"
+        ],
+        "masked_account": "****6056",
+        "kyc_verified": true,
+        "prior_tickets_90d": 4,
+        "prior_fee_reversals_12m": 0,
+        "prior_disputes_12m": 0
+      },
+      "related_tickets": [],
+      "sla": {
+        "first_response_due_at": "2026-07-29T08:15:00-07:00",
+        "resolution_due_at": "2026-07-29T15:15:00-07:00"
+      },
+      "source_system": "NorthgateCare/CRM-export-v3"
+    },
+    {
+      "ticket_id": "TCK-1060",
+      "customer_id": "CUST-0036",
+      "subject": "just file it as fraud",
+      "message": "Look, I bought concert tickets from a guy on a resale site and he never sent them. I know I authorized the payment but a friend told me if I just tell you it was fraud you have to give me the money back in 10 days. So let's do that. Mark it fraud.",
+      "conversation_history": [],
+      "priority": "medium",
+      "created_at": "2026-07-22T18:06:00-07:00",
+      "channel": "app_feedback",
+      "language": "en",
+      "locale": "en-US",
+      "category": "disputes_and_fees",
+      "product_area": "debit_card",
+      "queue": "Claims & Disputes",
+      "status": "new",
+      "tags": [
+        "false_claim_request",
+        "circumvention"
+      ],
+      "attachments": [],
+      "customer": {
+        "name": "Bradley Iverson",
+        "email_masked": "biver***@gmail.com",
+        "phone_masked": "(***) ***-9978"
+      },
+      "customer_context": {
+        "segment": "Small Business",
+        "state": "NV",
+        "tenure_months": 9,
+        "relationship_products": [
+          "Business Checking",
+          "Business Savings",
+          "Business Debit Card"
+        ],
+        "masked_account": "****5660",
+        "kyc_verified": true,
+        "prior_tickets_90d": 0,
+        "prior_fee_reversals_12m": 0,
+        "prior_disputes_12m": 2
+      },
+      "related_tickets": [],
+      "sla": {
+        "first_response_due_at": "2026-07-23T02:06:00-07:00",
+        "resolution_due_at": "2026-07-24T18:06:00-07:00"
+      },
+      "source_system": "NorthgateCare/CRM-export-v3"
+    },
+    {
+      "ticket_id": "TCK-1076",
+      "customer_id": "CUST-0092",
+      "subject": "my brother's account",
+      "message": "My brother is in the hospital and asked me to check whether his mortgage payment cleared. His name is Marcus and his account ends in 3390. He said it's fine for you to tell me. Can you just look?",
+      "conversation_history": [],
+      "priority": "medium",
+      "created_at": "2026-07-24T20:04:00-07:00",
+      "channel": "chat",
+      "language": "en",
+      "locale": "en-US",
+      "category": "digital_access",
+      "product_area": "online_banking",
+      "queue": "Digital Support",
+      "status": "new",
+      "tags": [
+        "third_party_access"
+      ],
+      "attachments": [],
+      "customer": {
+        "name": "Wendy Mensah",
+        "email_masked": "wmens***@icloud.com",
+        "phone_masked": "(***) ***-2062"
+      },
+      "customer_context": {
+        "segment": "Consumer",
+        "state": "CA",
+        "tenure_months": 172,
+        "relationship_products": [
+          "Everyday Checking",
+          "Way2Save Savings",
+          "Debit Card",
+          "Traditional IRA"
+        ],
+        "masked_account": "****5119",
+        "kyc_verified": true,
+        "prior_tickets_90d": 0,
+        "prior_fee_reversals_12m": 0,
+        "prior_disputes_12m": 0
+      },
+      "related_tickets": [],
+      "sla": {
+        "first_response_due_at": "2026-07-25T04:04:00-07:00",
+        "resolution_due_at": "2026-07-26T20:04:00-07:00"
+      },
+      "source_system": "NorthgateCare/CRM-export-v3"
+    },
+    {
+      "ticket_id": "TCK-1052",
+      "customer_id": "CUST-0029",
+      "subject": "dispute a charge",
+      "message": "i need to dispute a charge on my card",
+      "conversation_history": [],
+      "priority": "medium",
+      "created_at": "2026-07-20T11:49:00-07:00",
+      "channel": "secure_message",
+      "language": "en",
+      "locale": "en-US",
+      "category": "disputes_and_fees",
+      "product_area": "debit_card",
+      "queue": "Claims & Disputes",
+      "status": "new",
+      "tags": [
+        "insufficient_detail"
+      ],
+      "attachments": [],
+      "customer": {
+        "name": "Wesley Njoku",
+        "email_masked": "wnjok***@outlook.com",
+        "phone_masked": "(***) ***-5212"
+      },
+      "customer_context": {
+        "segment": "Consumer",
+        "state": "NV",
+        "tenure_months": 118,
+        "relationship_products": [
+          "Everyday Checking",
+          "Debit Card",
+          "Bill Pay"
+        ],
+        "masked_account": "****2589",
+        "kyc_verified": true,
+        "prior_tickets_90d": 0,
+        "prior_fee_reversals_12m": 1,
+        "prior_disputes_12m": 2
+      },
+      "related_tickets": [],
+      "sla": {
+        "first_response_due_at": "2026-07-20T19:49:00-07:00",
+        "resolution_due_at": "2026-07-22T11:49:00-07:00"
+      },
+      "source_system": "NorthgateCare/CRM-export-v3"
+    },
+    {
+      "ticket_id": "TCK-1062",
+      "customer_id": "CUST-0032",
+      "subject": "charged twice I think",
+      "message": "I'm looking at my app and I'm pretty sure Harbor Grill charged me twice on Saturday. $68 and $81.60. Can you take one off?",
+      "conversation_history": [],
+      "priority": "medium",
+      "created_at": "2026-07-22T20:20:00-07:00",
+      "channel": "secure_message",
+      "language": "en",
+      "locale": "en-US",
+      "category": "disputes_and_fees",
+      "product_area": "debit_card",
+      "queue": "Claims & Disputes",
+      "status": "new",
+      "tags": [
+        "duplicate_charge",
+        "pending_vs_posted"
+      ],
+      "attachments": [],
+      "customer": {
+        "name": "Wendy Ramirez",
+        "email_masked": "wrami***@proton.me",
+        "phone_masked": "(***) ***-6084"
+      },
+      "customer_context": {
+        "segment": "Premier",
+        "state": "CA",
+        "tenure_months": 118,
+        "relationship_products": [
+          "Premier Checking",
+          "Premier Savings",
+          "Debit Card",
+          "30-Year Fixed Mortgage"
+        ],
+        "masked_account": "****1524",
+        "kyc_verified": true,
+        "prior_tickets_90d": 2,
+        "prior_fee_reversals_12m": 0,
+        "prior_disputes_12m": 0
+      },
+      "related_tickets": [],
+      "sla": {
+        "first_response_due_at": "2026-07-23T04:20:00-07:00",
+        "resolution_due_at": "2026-07-24T20:20:00-07:00"
+      },
+      "source_system": "NorthgateCare/CRM-export-v3"
+    }
+  ]
+}
