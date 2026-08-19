@@ -1,0 +1,51 @@
+# Application config. Only the keys P1 (retrieval) needs are filled in; later phases
+# append their own sections. Everything a compliance reviewer or a tuning sweep might want
+# to change lives here, never in Python.
+
+paths:
+  knowledge_base: data/knowledge_base
+  tickets: data/tickets/synthetic_tickets.json
+  golden_dataset: data/evaluation/golden_dataset.json
+  chroma_dir: .chroma
+  outputs: outputs
+
+retrieval:
+  collection_name: northgate_kb
+
+  embedding:
+    # Local sentence-transformers model. 384 dimensions, 512-token window, no API key,
+    # no per-call cost. Groq serves no embedding endpoint, so this is forced -- and it is
+    # also why the whole pipeline has zero marginal cost.
+    model_name: BAAI/bge-small-en-v1.5
+    normalize: true
+    # bge-v1.5 models are trained with an asymmetric instruction: queries get this prefix,
+    # documents get nothing. Skipping it costs a few points of recall for free.
+    query_prefix: "Represent this sentence for searching relevant passages: "
+    batch_size: 32
+
+  chunking:
+    # 480, not the 800 in lld_notes.md §3. bge-small truncates at 512 tokens *silently*,
+    # so an 800-token chunk is indexed on its first 512 and the tail is invisible.
+    # 480 leaves room for the header we prepend. See docs/lld_p1_retrieval.md.
+    max_tokens: 480
+    overlap_tokens: 75
+    embed_doc_title: true
+    embed_section_title: true
+    # Prepending the full scope note to every clause: sweepable. Off by default because it
+    # spends ~120 of 480 tokens and makes sibling clauses look alike to the embedder.
+    embed_scope_note: false
+
+  search:
+    k: 5
+    # Cosine similarity, not distance. Chroma is configured with hnsw:space=cosine, so
+    # similarity = 1 - distance. Sweep this against the 8 no-policy tickets: too low and
+    # "no policy covers this" is never detected, too high and easy tickets escalate.
+    similarity_floor: 0.35
+    # A clause split into parts appears once, at its best-scoring part.
+    dedupe_by_policy_id: true
+    # After dedupe, refetch sibling parts so the LLM sees the whole clause. Retrieval sees
+    # fragments; the prompt does not.
+    stitch_clause_parts: true
+
+logging:
+  level: INFO

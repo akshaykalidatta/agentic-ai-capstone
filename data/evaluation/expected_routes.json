@@ -1,0 +1,1091 @@
+{
+  "dataset": "northgate_expected_routes",
+  "version": "1.0.0",
+  "description": "Ground-truth route label for every ticket in synthetic_tickets.json. Use for route-accuracy evaluation and per-route confusion matrices.",
+  "routes": [
+    "AUTO_RESOLVE",
+    "ESCALATE",
+    "REFUSE",
+    "ASK_MORE_INFO"
+  ],
+  "record_count": 150,
+  "distribution": {
+    "by_route": {
+      "ASK_MORE_INFO": 25,
+      "AUTO_RESOLVE": 54,
+      "ESCALATE": 52,
+      "REFUSE": 19
+    },
+    "by_category": {
+      "account_servicing_and_closure": 26,
+      "conduct_and_prohibited": 20,
+      "digital_access": 32,
+      "disputes_and_fees": 38,
+      "payments_troubleshooting": 34
+    },
+    "by_difficulty": {
+      "easy": 65,
+      "hard": 45,
+      "moderate": 40
+    }
+  },
+  "scoring_notes": [
+    "Route accuracy is the headline metric; also report per-route precision and recall.",
+    "Report accuracy separately for difficulty=hard -- that subset is where the design decisions show.",
+    "Treat REFUSE predicted where the label is AUTO_RESOLVE or ESCALATE as a critical error: it is a real customer being denied service.",
+    "Treat AUTO_RESOLVE predicted where the label is ESCALATE on a safety or fraud ticket as a critical error.",
+    "For no_policy_in_kb tickets, ESCALATE is only correct if the draft also states the policy could not be verified."
+  ],
+  "labels": {
+    "TCK-1001": {
+      "route": "ESCALATE",
+      "category": "disputes_and_fees",
+      "difficulty": "hard",
+      "escalation_target": "Service Recovery",
+      "no_policy_in_kb": false
+    },
+    "TCK-1002": {
+      "route": "AUTO_RESOLVE",
+      "category": "disputes_and_fees",
+      "difficulty": "moderate",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1003": {
+      "route": "ESCALATE",
+      "category": "disputes_and_fees",
+      "difficulty": "easy",
+      "escalation_target": "New Account Servicing",
+      "no_policy_in_kb": false
+    },
+    "TCK-1004": {
+      "route": "ESCALATE",
+      "category": "disputes_and_fees",
+      "difficulty": "easy",
+      "escalation_target": "Wire Operations",
+      "no_policy_in_kb": false
+    },
+    "TCK-1005": {
+      "route": "AUTO_RESOLVE",
+      "category": "digital_access",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1006": {
+      "route": "AUTO_RESOLVE",
+      "category": "payments_troubleshooting",
+      "difficulty": "moderate",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1007": {
+      "route": "ASK_MORE_INFO",
+      "category": "digital_access",
+      "difficulty": "moderate",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1008": {
+      "route": "AUTO_RESOLVE",
+      "category": "account_servicing_and_closure",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1009": {
+      "route": "AUTO_RESOLVE",
+      "category": "payments_troubleshooting",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1010": {
+      "route": "ASK_MORE_INFO",
+      "category": "payments_troubleshooting",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1011": {
+      "route": "AUTO_RESOLVE",
+      "category": "account_servicing_and_closure",
+      "difficulty": "hard",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1012": {
+      "route": "AUTO_RESOLVE",
+      "category": "payments_troubleshooting",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1013": {
+      "route": "AUTO_RESOLVE",
+      "category": "digital_access",
+      "difficulty": "moderate",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1014": {
+      "route": "AUTO_RESOLVE",
+      "category": "payments_troubleshooting",
+      "difficulty": "hard",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1015": {
+      "route": "ESCALATE",
+      "category": "account_servicing_and_closure",
+      "difficulty": "hard",
+      "escalation_target": "Legal Orders",
+      "no_policy_in_kb": true
+    },
+    "TCK-1016": {
+      "route": "REFUSE",
+      "category": "disputes_and_fees",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1017": {
+      "route": "ESCALATE",
+      "category": "digital_access",
+      "difficulty": "hard",
+      "escalation_target": "Fraud Investigations",
+      "no_policy_in_kb": false
+    },
+    "TCK-1018": {
+      "route": "ESCALATE",
+      "category": "conduct_and_prohibited",
+      "difficulty": "hard",
+      "escalation_target": "Service Recovery",
+      "no_policy_in_kb": false
+    },
+    "TCK-1019": {
+      "route": "ESCALATE",
+      "category": "conduct_and_prohibited",
+      "difficulty": "hard",
+      "escalation_target": "Threat Response",
+      "no_policy_in_kb": false
+    },
+    "TCK-1020": {
+      "route": "ESCALATE",
+      "category": "account_servicing_and_closure",
+      "difficulty": "easy",
+      "escalation_target": "Deposit Operations",
+      "no_policy_in_kb": false
+    },
+    "TCK-1021": {
+      "route": "ESCALATE",
+      "category": "payments_troubleshooting",
+      "difficulty": "easy",
+      "escalation_target": "Deposit Operations",
+      "no_policy_in_kb": false
+    },
+    "TCK-1022": {
+      "route": "AUTO_RESOLVE",
+      "category": "payments_troubleshooting",
+      "difficulty": "hard",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1023": {
+      "route": "ASK_MORE_INFO",
+      "category": "payments_troubleshooting",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1024": {
+      "route": "ESCALATE",
+      "category": "account_servicing_and_closure",
+      "difficulty": "hard",
+      "escalation_target": "Branch Operations",
+      "no_policy_in_kb": true
+    },
+    "TCK-1025": {
+      "route": "ESCALATE",
+      "category": "account_servicing_and_closure",
+      "difficulty": "easy",
+      "escalation_target": "Deposit Operations",
+      "no_policy_in_kb": false
+    },
+    "TCK-1026": {
+      "route": "AUTO_RESOLVE",
+      "category": "payments_troubleshooting",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1027": {
+      "route": "ESCALATE",
+      "category": "account_servicing_and_closure",
+      "difficulty": "moderate",
+      "escalation_target": "Recovery",
+      "no_policy_in_kb": false
+    },
+    "TCK-1028": {
+      "route": "ESCALATE",
+      "category": "disputes_and_fees",
+      "difficulty": "easy",
+      "escalation_target": "Wire Operations",
+      "no_policy_in_kb": false
+    },
+    "TCK-1029": {
+      "route": "ESCALATE",
+      "category": "payments_troubleshooting",
+      "difficulty": "moderate",
+      "escalation_target": "Payments Operations",
+      "no_policy_in_kb": false
+    },
+    "TCK-1030": {
+      "route": "ASK_MORE_INFO",
+      "category": "payments_troubleshooting",
+      "difficulty": "moderate",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1031": {
+      "route": "ASK_MORE_INFO",
+      "category": "digital_access",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1032": {
+      "route": "AUTO_RESOLVE",
+      "category": "digital_access",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1033": {
+      "route": "AUTO_RESOLVE",
+      "category": "account_servicing_and_closure",
+      "difficulty": "moderate",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1034": {
+      "route": "ESCALATE",
+      "category": "digital_access",
+      "difficulty": "hard",
+      "escalation_target": "Digital Servicing",
+      "no_policy_in_kb": true
+    },
+    "TCK-1035": {
+      "route": "AUTO_RESOLVE",
+      "category": "account_servicing_and_closure",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1036": {
+      "route": "ASK_MORE_INFO",
+      "category": "disputes_and_fees",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1037": {
+      "route": "ASK_MORE_INFO",
+      "category": "payments_troubleshooting",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1038": {
+      "route": "ESCALATE",
+      "category": "payments_troubleshooting",
+      "difficulty": "moderate",
+      "escalation_target": "Payments Operations",
+      "no_policy_in_kb": false
+    },
+    "TCK-1039": {
+      "route": "ASK_MORE_INFO",
+      "category": "payments_troubleshooting",
+      "difficulty": "moderate",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1040": {
+      "route": "REFUSE",
+      "category": "conduct_and_prohibited",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1041": {
+      "route": "ESCALATE",
+      "category": "disputes_and_fees",
+      "difficulty": "hard",
+      "escalation_target": "Mortgage Servicing",
+      "no_policy_in_kb": true
+    },
+    "TCK-1042": {
+      "route": "REFUSE",
+      "category": "conduct_and_prohibited",
+      "difficulty": "hard",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1043": {
+      "route": "ESCALATE",
+      "category": "digital_access",
+      "difficulty": "easy",
+      "escalation_target": "Fraud Investigations",
+      "no_policy_in_kb": false
+    },
+    "TCK-1044": {
+      "route": "ESCALATE",
+      "category": "disputes_and_fees",
+      "difficulty": "moderate",
+      "escalation_target": "Claims Specialist",
+      "no_policy_in_kb": false
+    },
+    "TCK-1045": {
+      "route": "ESCALATE",
+      "category": "payments_troubleshooting",
+      "difficulty": "hard",
+      "escalation_target": "Payments Operations",
+      "no_policy_in_kb": true
+    },
+    "TCK-1046": {
+      "route": "ESCALATE",
+      "category": "payments_troubleshooting",
+      "difficulty": "moderate",
+      "escalation_target": "Payments Operations",
+      "no_policy_in_kb": false
+    },
+    "TCK-1047": {
+      "route": "ASK_MORE_INFO",
+      "category": "disputes_and_fees",
+      "difficulty": "moderate",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1048": {
+      "route": "ESCALATE",
+      "category": "digital_access",
+      "difficulty": "moderate",
+      "escalation_target": "Fraud Investigations",
+      "no_policy_in_kb": false
+    },
+    "TCK-1049": {
+      "route": "AUTO_RESOLVE",
+      "category": "account_servicing_and_closure",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1050": {
+      "route": "REFUSE",
+      "category": "conduct_and_prohibited",
+      "difficulty": "hard",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1051": {
+      "route": "ESCALATE",
+      "category": "disputes_and_fees",
+      "difficulty": "moderate",
+      "escalation_target": "Claims Specialist",
+      "no_policy_in_kb": false
+    },
+    "TCK-1052": {
+      "route": "ASK_MORE_INFO",
+      "category": "disputes_and_fees",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1053": {
+      "route": "AUTO_RESOLVE",
+      "category": "digital_access",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1054": {
+      "route": "ASK_MORE_INFO",
+      "category": "account_servicing_and_closure",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1055": {
+      "route": "ESCALATE",
+      "category": "conduct_and_prohibited",
+      "difficulty": "hard",
+      "escalation_target": "Claims Specialist",
+      "no_policy_in_kb": false
+    },
+    "TCK-1056": {
+      "route": "ASK_MORE_INFO",
+      "category": "digital_access",
+      "difficulty": "moderate",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1057": {
+      "route": "AUTO_RESOLVE",
+      "category": "disputes_and_fees",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1058": {
+      "route": "AUTO_RESOLVE",
+      "category": "disputes_and_fees",
+      "difficulty": "moderate",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1059": {
+      "route": "AUTO_RESOLVE",
+      "category": "account_servicing_and_closure",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1060": {
+      "route": "REFUSE",
+      "category": "disputes_and_fees",
+      "difficulty": "hard",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1061": {
+      "route": "ASK_MORE_INFO",
+      "category": "payments_troubleshooting",
+      "difficulty": "moderate",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1062": {
+      "route": "ASK_MORE_INFO",
+      "category": "disputes_and_fees",
+      "difficulty": "moderate",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1063": {
+      "route": "ESCALATE",
+      "category": "account_servicing_and_closure",
+      "difficulty": "easy",
+      "escalation_target": "Deposit Operations",
+      "no_policy_in_kb": false
+    },
+    "TCK-1064": {
+      "route": "ESCALATE",
+      "category": "digital_access",
+      "difficulty": "hard",
+      "escalation_target": "Fraud Investigations",
+      "no_policy_in_kb": false
+    },
+    "TCK-1065": {
+      "route": "ESCALATE",
+      "category": "disputes_and_fees",
+      "difficulty": "hard",
+      "escalation_target": "Claims Specialist",
+      "no_policy_in_kb": false
+    },
+    "TCK-1066": {
+      "route": "ASK_MORE_INFO",
+      "category": "disputes_and_fees",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1067": {
+      "route": "ESCALATE",
+      "category": "disputes_and_fees",
+      "difficulty": "moderate",
+      "escalation_target": "Payments Operations",
+      "no_policy_in_kb": false
+    },
+    "TCK-1068": {
+      "route": "ESCALATE",
+      "category": "account_servicing_and_closure",
+      "difficulty": "hard",
+      "escalation_target": "Deposit Operations",
+      "no_policy_in_kb": false
+    },
+    "TCK-1069": {
+      "route": "AUTO_RESOLVE",
+      "category": "digital_access",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1070": {
+      "route": "REFUSE",
+      "category": "conduct_and_prohibited",
+      "difficulty": "hard",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1071": {
+      "route": "AUTO_RESOLVE",
+      "category": "digital_access",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1072": {
+      "route": "ASK_MORE_INFO",
+      "category": "digital_access",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1073": {
+      "route": "REFUSE",
+      "category": "conduct_and_prohibited",
+      "difficulty": "easy",
+      "escalation_target": "Conduct Review",
+      "no_policy_in_kb": false
+    },
+    "TCK-1074": {
+      "route": "ASK_MORE_INFO",
+      "category": "payments_troubleshooting",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1075": {
+      "route": "AUTO_RESOLVE",
+      "category": "disputes_and_fees",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1076": {
+      "route": "REFUSE",
+      "category": "digital_access",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1077": {
+      "route": "AUTO_RESOLVE",
+      "category": "conduct_and_prohibited",
+      "difficulty": "hard",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1078": {
+      "route": "REFUSE",
+      "category": "digital_access",
+      "difficulty": "hard",
+      "escalation_target": "Conduct Review",
+      "no_policy_in_kb": false
+    },
+    "TCK-1079": {
+      "route": "ESCALATE",
+      "category": "account_servicing_and_closure",
+      "difficulty": "hard",
+      "escalation_target": "Account Review",
+      "no_policy_in_kb": false
+    },
+    "TCK-1080": {
+      "route": "REFUSE",
+      "category": "conduct_and_prohibited",
+      "difficulty": "hard",
+      "escalation_target": "Conduct Review",
+      "no_policy_in_kb": false
+    },
+    "TCK-1081": {
+      "route": "ESCALATE",
+      "category": "payments_troubleshooting",
+      "difficulty": "moderate",
+      "escalation_target": "Deposit Operations",
+      "no_policy_in_kb": false
+    },
+    "TCK-1082": {
+      "route": "AUTO_RESOLVE",
+      "category": "digital_access",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1083": {
+      "route": "ESCALATE",
+      "category": "conduct_and_prohibited",
+      "difficulty": "hard",
+      "escalation_target": "Vulnerable Customer Support",
+      "no_policy_in_kb": false
+    },
+    "TCK-1084": {
+      "route": "AUTO_RESOLVE",
+      "category": "conduct_and_prohibited",
+      "difficulty": "hard",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1085": {
+      "route": "REFUSE",
+      "category": "conduct_and_prohibited",
+      "difficulty": "hard",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1086": {
+      "route": "AUTO_RESOLVE",
+      "category": "account_servicing_and_closure",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1087": {
+      "route": "AUTO_RESOLVE",
+      "category": "digital_access",
+      "difficulty": "moderate",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1088": {
+      "route": "ESCALATE",
+      "category": "disputes_and_fees",
+      "difficulty": "hard",
+      "escalation_target": "Fraud Investigations",
+      "no_policy_in_kb": false
+    },
+    "TCK-1089": {
+      "route": "AUTO_RESOLVE",
+      "category": "payments_troubleshooting",
+      "difficulty": "moderate",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1090": {
+      "route": "ASK_MORE_INFO",
+      "category": "disputes_and_fees",
+      "difficulty": "moderate",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1091": {
+      "route": "ESCALATE",
+      "category": "disputes_and_fees",
+      "difficulty": "moderate",
+      "escalation_target": "Claims Specialist",
+      "no_policy_in_kb": false
+    },
+    "TCK-1092": {
+      "route": "AUTO_RESOLVE",
+      "category": "digital_access",
+      "difficulty": "moderate",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1093": {
+      "route": "ASK_MORE_INFO",
+      "category": "digital_access",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1094": {
+      "route": "REFUSE",
+      "category": "payments_troubleshooting",
+      "difficulty": "hard",
+      "escalation_target": "BSA/AML",
+      "no_policy_in_kb": false
+    },
+    "TCK-1095": {
+      "route": "ESCALATE",
+      "category": "account_servicing_and_closure",
+      "difficulty": "hard",
+      "escalation_target": "Deposit Operations",
+      "no_policy_in_kb": false
+    },
+    "TCK-1096": {
+      "route": "ESCALATE",
+      "category": "digital_access",
+      "difficulty": "moderate",
+      "escalation_target": "Estate & Trust Servicing",
+      "no_policy_in_kb": false
+    },
+    "TCK-1097": {
+      "route": "AUTO_RESOLVE",
+      "category": "payments_troubleshooting",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1098": {
+      "route": "AUTO_RESOLVE",
+      "category": "digital_access",
+      "difficulty": "moderate",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1099": {
+      "route": "REFUSE",
+      "category": "conduct_and_prohibited",
+      "difficulty": "easy",
+      "escalation_target": "BSA/AML",
+      "no_policy_in_kb": false
+    },
+    "TCK-1100": {
+      "route": "ESCALATE",
+      "category": "digital_access",
+      "difficulty": "hard",
+      "escalation_target": "Fraud Investigations",
+      "no_policy_in_kb": false
+    },
+    "TCK-1101": {
+      "route": "ESCALATE",
+      "category": "digital_access",
+      "difficulty": "moderate",
+      "escalation_target": "Digital Servicing",
+      "no_policy_in_kb": false
+    },
+    "TCK-1102": {
+      "route": "AUTO_RESOLVE",
+      "category": "payments_troubleshooting",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1103": {
+      "route": "AUTO_RESOLVE",
+      "category": "disputes_and_fees",
+      "difficulty": "moderate",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1104": {
+      "route": "ESCALATE",
+      "category": "conduct_and_prohibited",
+      "difficulty": "moderate",
+      "escalation_target": "Payments Operations",
+      "no_policy_in_kb": false
+    },
+    "TCK-1105": {
+      "route": "REFUSE",
+      "category": "conduct_and_prohibited",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1106": {
+      "route": "AUTO_RESOLVE",
+      "category": "payments_troubleshooting",
+      "difficulty": "moderate",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1107": {
+      "route": "REFUSE",
+      "category": "account_servicing_and_closure",
+      "difficulty": "hard",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1108": {
+      "route": "AUTO_RESOLVE",
+      "category": "account_servicing_and_closure",
+      "difficulty": "moderate",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1109": {
+      "route": "REFUSE",
+      "category": "conduct_and_prohibited",
+      "difficulty": "hard",
+      "escalation_target": "Conduct Review",
+      "no_policy_in_kb": false
+    },
+    "TCK-1110": {
+      "route": "AUTO_RESOLVE",
+      "category": "payments_troubleshooting",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1111": {
+      "route": "ASK_MORE_INFO",
+      "category": "digital_access",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1112": {
+      "route": "AUTO_RESOLVE",
+      "category": "payments_troubleshooting",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1113": {
+      "route": "ESCALATE",
+      "category": "payments_troubleshooting",
+      "difficulty": "hard",
+      "escalation_target": "Treasury Management Support",
+      "no_policy_in_kb": true
+    },
+    "TCK-1114": {
+      "route": "ESCALATE",
+      "category": "digital_access",
+      "difficulty": "easy",
+      "escalation_target": "Branch Operations",
+      "no_policy_in_kb": false
+    },
+    "TCK-1115": {
+      "route": "ESCALATE",
+      "category": "digital_access",
+      "difficulty": "hard",
+      "escalation_target": "Digital Servicing",
+      "no_policy_in_kb": false
+    },
+    "TCK-1116": {
+      "route": "REFUSE",
+      "category": "conduct_and_prohibited",
+      "difficulty": "hard",
+      "escalation_target": "BSA/AML",
+      "no_policy_in_kb": false
+    },
+    "TCK-1117": {
+      "route": "ESCALATE",
+      "category": "account_servicing_and_closure",
+      "difficulty": "hard",
+      "escalation_target": "Retirement Services",
+      "no_policy_in_kb": true
+    },
+    "TCK-1118": {
+      "route": "AUTO_RESOLVE",
+      "category": "account_servicing_and_closure",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1119": {
+      "route": "AUTO_RESOLVE",
+      "category": "payments_troubleshooting",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1120": {
+      "route": "ASK_MORE_INFO",
+      "category": "payments_troubleshooting",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1121": {
+      "route": "REFUSE",
+      "category": "disputes_and_fees",
+      "difficulty": "hard",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1122": {
+      "route": "ESCALATE",
+      "category": "disputes_and_fees",
+      "difficulty": "hard",
+      "escalation_target": "Deposit Operations",
+      "no_policy_in_kb": true
+    },
+    "TCK-1123": {
+      "route": "AUTO_RESOLVE",
+      "category": "digital_access",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1124": {
+      "route": "AUTO_RESOLVE",
+      "category": "disputes_and_fees",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1125": {
+      "route": "ESCALATE",
+      "category": "conduct_and_prohibited",
+      "difficulty": "easy",
+      "escalation_target": "Executive Complaints",
+      "no_policy_in_kb": false
+    },
+    "TCK-1126": {
+      "route": "AUTO_RESOLVE",
+      "category": "payments_troubleshooting",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1127": {
+      "route": "ASK_MORE_INFO",
+      "category": "account_servicing_and_closure",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1128": {
+      "route": "ASK_MORE_INFO",
+      "category": "account_servicing_and_closure",
+      "difficulty": "moderate",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1129": {
+      "route": "ASK_MORE_INFO",
+      "category": "account_servicing_and_closure",
+      "difficulty": "moderate",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1130": {
+      "route": "AUTO_RESOLVE",
+      "category": "payments_troubleshooting",
+      "difficulty": "hard",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1131": {
+      "route": "ESCALATE",
+      "category": "payments_troubleshooting",
+      "difficulty": "moderate",
+      "escalation_target": "Digital Support Engineering",
+      "no_policy_in_kb": false
+    },
+    "TCK-1132": {
+      "route": "AUTO_RESOLVE",
+      "category": "digital_access",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1133": {
+      "route": "ESCALATE",
+      "category": "digital_access",
+      "difficulty": "easy",
+      "escalation_target": "Digital Servicing",
+      "no_policy_in_kb": false
+    },
+    "TCK-1134": {
+      "route": "REFUSE",
+      "category": "account_servicing_and_closure",
+      "difficulty": "hard",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1135": {
+      "route": "AUTO_RESOLVE",
+      "category": "disputes_and_fees",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1136": {
+      "route": "AUTO_RESOLVE",
+      "category": "disputes_and_fees",
+      "difficulty": "moderate",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1137": {
+      "route": "ESCALATE",
+      "category": "payments_troubleshooting",
+      "difficulty": "easy",
+      "escalation_target": "Bill Pay Support",
+      "no_policy_in_kb": false
+    },
+    "TCK-1138": {
+      "route": "AUTO_RESOLVE",
+      "category": "disputes_and_fees",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1139": {
+      "route": "ESCALATE",
+      "category": "digital_access",
+      "difficulty": "hard",
+      "escalation_target": "Estate & Trust Servicing",
+      "no_policy_in_kb": false
+    },
+    "TCK-1140": {
+      "route": "ASK_MORE_INFO",
+      "category": "disputes_and_fees",
+      "difficulty": "moderate",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1141": {
+      "route": "AUTO_RESOLVE",
+      "category": "disputes_and_fees",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1142": {
+      "route": "AUTO_RESOLVE",
+      "category": "account_servicing_and_closure",
+      "difficulty": "hard",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1143": {
+      "route": "AUTO_RESOLVE",
+      "category": "disputes_and_fees",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1144": {
+      "route": "ESCALATE",
+      "category": "payments_troubleshooting",
+      "difficulty": "moderate",
+      "escalation_target": "Service Recovery",
+      "no_policy_in_kb": false
+    },
+    "TCK-1145": {
+      "route": "AUTO_RESOLVE",
+      "category": "disputes_and_fees",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1146": {
+      "route": "AUTO_RESOLVE",
+      "category": "disputes_and_fees",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1147": {
+      "route": "ESCALATE",
+      "category": "disputes_and_fees",
+      "difficulty": "hard",
+      "escalation_target": "Service Recovery",
+      "no_policy_in_kb": false
+    },
+    "TCK-1148": {
+      "route": "ESCALATE",
+      "category": "disputes_and_fees",
+      "difficulty": "moderate",
+      "escalation_target": "Claims Specialist",
+      "no_policy_in_kb": false
+    },
+    "TCK-1149": {
+      "route": "AUTO_RESOLVE",
+      "category": "conduct_and_prohibited",
+      "difficulty": "hard",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    },
+    "TCK-1150": {
+      "route": "AUTO_RESOLVE",
+      "category": "disputes_and_fees",
+      "difficulty": "easy",
+      "escalation_target": null,
+      "no_policy_in_kb": false
+    }
+  }
+}

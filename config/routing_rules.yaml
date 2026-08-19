@@ -1,0 +1,32 @@
+# Policy thresholds and rule data, kept as YAML so a compliance reviewer can read them
+# without reading Python. Changing a threshold must never mean editing a graph node.
+#
+# P1 only needs the two retrieval-facing sections below. Preconditions, per-route
+# confidence floors and the escalation-target map arrive in P2/P3.
+
+# Clauses injected into context regardless of similarity score. Retrieval is probabilistic;
+# these are the clauses we are not willing to leave to chance.
+guaranteed_context:
+  always:
+    # CON-011 (what must never trigger a refusal) on every ticket costs ~150 tokens and is
+    # the cheapest defence in the project against the 6 tone traps.
+    - CON-010   # refusal drafting standards -- internal, never quoted to a customer
+    - CON-011   # what must never trigger a refusal
+
+  by_sentiment:
+    angry: [CON-001, CON-002]
+    distressed: [CON-001, CON-002]
+
+  by_category:
+    conduct_and_prohibited: ["CON-*"]   # the whole family
+    disputes_and_fees: [DSP-006]        # statements agents must not make
+
+  by_product_area:
+    digital_access: [ACC-007, ACC-010]
+
+# Retrievable and injectable, but never quotable to a customer. CON-010 is the only clause
+# of the 59 that appears in the golden set's grounding claims yet never in any ticket's
+# expected_policy_ids: it is an internal drafting standard. Citing it is both a citation
+# error and a bad reply.
+non_citable_policy_ids:
+  - CON-010
