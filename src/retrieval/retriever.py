@@ -44,9 +44,11 @@ class Hit:
     section: str
     title: str
     text: str
-    similarity: float | None  # None for injected clauses -- they were not scored
+    similarity: float | None  # dense cosine; None for injected clauses and BM25-only hits
     citable: bool
     injected: bool = False
+    bm25_score: float | None = None  # lexical evidence, when hybrid is on
+    fused_score: float | None = None  # RRF score that decided the rank
 
     @property
     def label(self) -> str:
@@ -145,6 +147,21 @@ def resolve_guaranteed_policy_ids(
     return list(dict.fromkeys(out))
 
 
+def _rank_score(item: dict[str, Any]) -> float:
+    """
+    How good is this candidate, for dedupe purposes.
+
+    Prefers the fused score when hybrid produced one, then the dense cosine. A BM25-only hit
+    has `similarity=None`, so a bare `>` comparison here raises TypeError -- which is exactly
+    what happened the first time hybrid was switched on.
+    """
+    fused = item.get("fused_score")
+    if fused is not None:
+        return float(fused)
+    similarity = item.get("similarity")
+    return float(similarity) if similarity is not None else 0.0
+
+
 class Retriever:
     def __init__(
         self,
@@ -185,6 +202,8 @@ class Retriever:
             similarity=raw.get("similarity"),
             citable=bool(meta.get("citable", False)),
             injected=injected,
+            bm25_score=raw.get("bm25_score"),
+            fused_score=raw.get("fused_score"),
         )
 
     def _stitch(self, hit: Hit, parts: list[dict[str, Any]]) -> Hit:
@@ -231,7 +250,7 @@ class Retriever:
             if key not in best:
                 best[key] = item
                 ordered_keys.append(key)
-            elif item["similarity"] > best[key]["similarity"]:
+            elif _rank_score(item) > _rank_score(best[key]):
                 best[key] = item  # keep the best-scoring part, keep original rank order
 
         kept: list[Hit] = []
@@ -282,31 +301,70 @@ class Retriever:
         return result
 
 
-def build_default_retriever() -> Retriever:
-    """Wire a retriever straight from the config files. Used by scripts and by the graph."""
-    from src.retrieval.vector_store import Embedder, KBVectorStore
-    from src.utils.config import app_config, resolve, routing_rules
+def build_index(engine: str = "hybrid") -> Any:
+    """
+    Assemble the search backend. All three options present the same interface, so `Retriever`
+    does not know or care which it got.
+
+    * `bm25`   -- lexical only. No torch, no Chroma, no built index. Scores doc recall@5 0.926
+                  on its own, which makes it a usable fallback rather than just a test double.
+    * `dense`  -- Chroma + sentence-transformers, the P1 slice.
+    * `hybrid` -- both, fused by RRF. The default.
+    """
+    from src.utils.config import app_config, resolve
 
     cfg = app_config()
     ret_cfg = cfg["retrieval"]
-    emb_cfg = ret_cfg["embedding"]
-    search = ret_cfg["search"]
 
-    embedder = Embedder(
-        emb_cfg["model_name"],
-        normalize=emb_cfg.get("normalize", True),
-        query_prefix=emb_cfg.get("query_prefix", ""),
-        batch_size=emb_cfg.get("batch_size", 32),
-    )
+    if engine == "bm25":
+        from src.retrieval.bm25 import BM25Index
+
+        return BM25Index.from_knowledge_base()
+
+    from src.retrieval.vector_store import Embedder, KBVectorStore
+
+    emb_cfg = ret_cfg["embedding"]
     store = KBVectorStore(
         resolve(cfg["paths"]["chroma_dir"]),
         collection_name=ret_cfg.get("collection_name", "northgate_kb"),
-        embedder=embedder,
+        embedder=Embedder(
+            emb_cfg["model_name"],
+            normalize=emb_cfg.get("normalize", True),
+            query_prefix=emb_cfg.get("query_prefix", ""),
+            batch_size=emb_cfg.get("batch_size", 32),
+        ),
     )
     if store.count() == 0:
         raise RuntimeError(
-            "the vector index is empty -- run `python scripts/build_index.py` first"
+            "the vector index is empty -- run `python scripts/build_index.py` first, "
+            "or use engine='bm25' which needs no index"
         )
+    if engine == "dense":
+        return store
+
+    from src.retrieval.bm25 import BM25Index
+    from src.retrieval.hybrid import HybridIndex
+
+    fusion = ret_cfg.get("fusion", {}) or {}
+    return HybridIndex(
+        store,
+        BM25Index.from_knowledge_base(),
+        candidate_pool=int(fusion.get("candidate_pool", 30)),
+        rrf_k=int(fusion.get("rrf_k", 60)),
+    )
+
+
+def build_default_retriever(engine: str | None = None) -> Retriever:
+    """Wire a retriever straight from the config files. Used by scripts and by the graph."""
+    from src.utils.config import app_config, routing_rules
+
+    cfg = app_config()
+    ret_cfg = cfg["retrieval"]
+    search = ret_cfg["search"]
+    if engine is None:
+        engine = "hybrid" if (ret_cfg.get("bm25", {}) or {}).get("enabled", True) else "dense"
+
+    store = build_index(engine)
     return Retriever(
         store,
         k=search.get("k", 5),

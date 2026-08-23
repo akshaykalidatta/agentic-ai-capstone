@@ -12,142 +12,25 @@
 
 ---
 
-## 1. Graph topology at node level
-
-Twelve nodes. This is the LangGraph-shaped view; the HLD's subsystem diagram is the one that
-survives a framework change.
-
-```mermaid
-flowchart TD
-    A([START]) --> B[triage<br/>sentiment · intent · safety scan · PII scrub]
-    B -->|safety_critical| SC[safety_escalate<br/>verbatim + short human reply]
-    B -->|normal| P[preconditions<br/>deterministic rules over customer_context]
-    P --> R[retrieve<br/>Chroma top-k + guaranteed clauses]
-    R --> PA[analyse_policy<br/>which clauses decide this?]
-    PA -->|weak grounding, under cap| RF[refine_query] --> R
-    PA --> RD[route_decision<br/>rule engine + LLM, reconciled]
-    RD --> C[score_confidence]
-    C -->|below route floor, under cap| RC[reconsider] --> PA
-    C -->|ok| D[draft_reply<br/>route-specific template + citations]
-    D --> V[validate_draft<br/>citations in retrieved · must_not_contain]
-    V -->|violation, under cap| D
-    V --> H{{hitl_gate}}
-    SC --> H
-    H -->|REQUEST_REGENERATION| D
-    H -->|APPROVE · APPROVE_AND_ROUTE<br/>EDIT · REJECT · ESCALATE| AL[audit_log<br/>+ customer_thread_store]
-    AL --> Z([END])
-```
-
-**Replace this hand-drawn diagram with generated output as soon as the graph compiles:**
-
-```python
-print(graph.get_graph().draw_mermaid())      # or .draw_mermaid_png()
-```
-
-A hand-maintained diagram of code drifts from the code. A generated one cannot.
-
-### 1.1 Wiring sketch
-
-```python
-from langgraph.graph import StateGraph, START, END
-
-builder = StateGraph(GraphState)
-
-for name, fn in [("triage", triage), ("preconditions", preconditions),
-                 ("retrieve", retrieve), ("refine_query", refine_query),
-                 ("analyse_policy", analyse_policy), ("route_decision", route_decision),
-                 ("score_confidence", score_confidence), ("draft_reply", draft_reply),
-                 ("validate_draft", validate_draft), ("safety_escalate", safety_escalate),
-                 ("hitl_gate", hitl_gate), ("audit_log", audit_log)]:
-    builder.add_node(name, fn)
-
-builder.add_edge(START, "triage")
-builder.add_conditional_edges("triage", after_triage,
-    {"safety": "safety_escalate", "normal": "preconditions"})
-builder.add_edge("preconditions", "retrieve")
-builder.add_edge("retrieve", "analyse_policy")
-builder.add_conditional_edges("analyse_policy", after_analysis,
-    {"refine": "refine_query", "route": "route_decision"})
-builder.add_edge("refine_query", "retrieve")                       # loop 1
-builder.add_edge("route_decision", "score_confidence")
-builder.add_conditional_edges("score_confidence", after_confidence,
-    {"reconsider": "analyse_policy", "draft": "draft_reply"})      # loop 2
-builder.add_edge("draft_reply", "validate_draft")
-builder.add_conditional_edges("validate_draft", after_validation,
-    {"repair": "draft_reply", "review": "hitl_gate"})              # loop 3
-builder.add_edge("safety_escalate", "hitl_gate")
-builder.add_conditional_edges("hitl_gate", after_review,
-    {"regenerate": "draft_reply", "done": "audit_log"})
-builder.add_edge("audit_log", END)
-
-graph = builder.compile(checkpointer=checkpointer)
-```
-
-Routers are plain Python over state — no model call, no magic:
-
-```python
-def after_analysis(state: GraphState) -> str:
-    weak = not state["policy_analysis"].policy_verified
-    return "refine" if weak and state["retrieval_attempts"] < 2 else "route"
-```
-
-### 1.2 Three things to get right
-
-1. **Every branch needs a key for every case.** LangGraph has no default edge; a router
-   returning something absent from the mapping raises at runtime rather than falling through.
-2. **`hitl_gate` hides a mode switch.** In interactive mode it calls `interrupt()`, suspending
-   the whole graph and returning control to Streamlit; on resume the node is re-entered *from
-   the top*, so it must handle "arriving fresh" vs "resuming with a decision". In auto and
-   simulate modes it is an ordinary node.
-3. **Loop caps live in the routers, not in the framework.** LangGraph's `recursion_limit` is a
-   crash guard that raises an exception; the counters are the design, because they route to
-   `ESCALATE` instead of dying.
-
-### 1.3 Loop caps
-
-| Loop | Trigger | Cap | Exit when capped |
-| --- | --- | --- | --- |
-| Retrieval refinement | No clause decides the question, or top-1 similarity below floor | 2 | `policy_verified = false` → `ESCALATE` |
-| Confidence re-check | Confidence below the proposed route's floor | 2 | Force `ESCALATE` |
-| Draft repair | Citation not in retrieved set, or prohibited-content hit | 2 | Force `ESCALATE` with a bare acknowledgement |
-
-`reconsider` must **change an input** — re-run analysis with the disagreement stated
-explicitly, optionally widening `k`. An identical retry is a wasted call that returns an
-identical answer.
-
----
-
-## 2. Graph state
-
-One `TypedDict`, partial updates only, nothing mutated in place so a checkpointer can replay
-any step.
-
-| Field | Type | Written by | Notes |
-| --- | --- | --- | --- |
-| `run_id`, `ticket_id` | `str` | entry | `run_id` groups a batch; both in every log line |
-| `ticket` | `Ticket` | entry | Pydantic model of the CRM record |
-| `customer_history` | `list[CaseSummary]` | entry | From the thread store, seeded by `related_tickets` |
-| `sentiment` | `Literal["neutral","frustrated","angry","distressed"]` | triage | The dataset's four labels exactly |
-| `safety_flags` | `list[SafetyFlag]` | triage | `{code, clause_id, evidence_span, severity}` |
-| `intent`, `entities` | `str`, `dict` | triage | Feeds query construction, not routing |
-| `preconditions` | `dict[str, Precondition]` | preconditions | `{met: bool\|None, reason: str, inputs: dict}` |
-| `retrieval_query` | `str` | retrieve / refine | Recorded per attempt |
-| `retrieved` | `list[Chunk]` | retrieve | `{chunk_id, doc, policy_id, text, score, source}` |
-| `retrieval_attempts` | `int` | retrieve | Cap 2 |
-| `policy_analysis` | `PolicyAnalysis` | analyse_policy | See §4 |
-| `rule_route`, `llm_route` | `Route \| None` | route_decision | Kept separately — the gap is the signal |
-| `route`, `escalation_target` | `Route`, `str \| None` | route_decision | Target valid on `REFUSE` too |
-| `escalation_visible_to_customer` | `bool` | route_decision | `False` for abuse referrals |
-| `route_rationale` | `str` | route_decision | Human-readable, lands in the audit log |
-| `confidence`, `confidence_parts` | `float`, `dict[str,float]` | score_confidence | Components stored for calibration |
-| `recheck_attempts` | `int` | score_confidence | Cap 2 |
-| `draft`, `cited_policy_ids` | `str`, `list[str]` | draft_reply | |
-| `validation` | `ValidationResult` | validate_draft | `{ok, violations[], hallucinated_citations[]}` |
-| `draft_attempts` | `int` | draft_reply | Cap 2 |
-| `reviewer` | `ReviewerDecision \| None` | hitl_gate | `{action, comments, edited_draft, reviewed_at}` |
-| `trace` | `list[NodeTrace]` | every node | `{node, started_at, ms, model, tokens, summary}` |
-
-Write these models in P0, before any node. They are the project's real interface docs.
+> ### Superseded sections have been deleted
+>
+> | Was | Now lives in | Deleted |
+> | --- | --- | --- |
+> | §1 Graph topology at node level | `pipeline.md` §2 and §3 | 2026-08-20 |
+> | §2 Graph state | `src/graph/graph_state.py` | 2026-08-20 |
+> | §9 Config keys | the three files in `config/`, which now carry their own rationale | 2026-08-20 |
+> | §10 Folder structure | `pipeline.md` §7 — realised on disk | 2026-08-20 |
+>
+> §3 (retrieval parameters) is **also superseded**, by `lld_p1_retrieval.md`, and should go the
+> next time you touch retrieval. It is left for now only because `lld_p1_retrieval.md` §4 and §6
+> reference it by number; move those references first, then delete it.
+>
+> §4 (analyse_policy contract), §5 (route reconciliation) and §6 (confidence formula) are now
+> **implemented** -- see `src/agents/policy.py`, `src/graph/nodes.route_decision` and
+> `src/routing/confidence.py`, with the reasoning in `pipeline.md` §3 and §5. Delete them here
+> once you have checked the code matches.
+>
+> §7, §8, §11 and §12 are still parking-lot material, for P6 and P8.
 
 ---
 
@@ -299,69 +182,6 @@ register(project_name="support-ticket-agent", auto_instrument=True)
 LangGraph runs on LangChain callbacks, so the LangChain instrumentor captures every node, model
 call and retrieval span with no further work. Phoenix *experiments* over the golden set are a
 stretch goal, after the custom evaluators work.
-
----
-
-## 9. Config keys
-
-| File | Holds |
-| --- | --- |
-| `config/app_config.yaml` | Paths, chunk ceiling and overlap, `k`, similarity floor, all three loop caps, HITL mode, output dirs, run-ID strategy, log level |
-| `config/model_config.yaml` | Provider, model ID per role, temperature, max tokens, embedding model, cache on/off, retry policy |
-| `config/routing_rules.yaml` | Precondition definitions and thresholds, per-route confidence floors, guaranteed-clause sets, escalation-target map, safety-code → target map |
-
-`routing_rules.yaml` is data so a compliance reviewer can read the thresholds without reading
-Python: one courtesy reversal per 12 months, 60-day fee window, 30-day new-account boundary,
-$2,500 and 3-disputes specialist thresholds. Changing a threshold must never mean touching a
-node.
-
-Model roles: `fast` = `llama-3.1-8b-instant` (sentiment, intent, query rewrite); `reason` =
-`openai/gpt-oss-120b`, fallback `llama-3.3-70b-versatile` (analysis, routing, drafting, judges);
-`embed` = local. `temperature: 0` everywhere so the cache is sound and runs are comparable.
-
-Cache: on-disk at `.cache/llm/`, keyed `sha256(model, prompt, temperature, schema)`. A full
-150-ticket run is roughly 600–900 calls.
-
----
-
-## 10. Folder structure
-
-Brief's structure kept as-is; additions marked `+`.
-
-```
-agentic-ai-capstone/
-├── config/            app_config · model_config · routing_rules
-├── data/              tickets · knowledge_base · evaluation      [done]
-├── gen/               seeded generator + validate.py             [done]
-├── src/
-│   ├── main.py
-│   ├── graph/         support_graph · graph_state · nodes · edges
-│   ├── agents/        triage · rag · policy · sentiment · response
-│   ├── routing/     + rules_engine · target_map
-│   ├── retrieval/     document_loader · chunking · vector_store · retriever
-│   │                + query_builder
-│   ├── memory/        conversation_memory · customer_thread_store
-│   ├── hitl/          approval_queue · reviewer_actions · approval_ui_stub
-│   ├── safety/        policy_checker · refusal_templates · abuse_detection
-│   ├── evaluation/    arize_evaluator · route_accuracy_eval · groundedness_eval
-│   │                  confidence_eval
-│   │                + citation_eval · retrieval_eval · safety_eval · no_policy_eval · report
-│   ├── logging/       audit_logger · trace_logger
-│   └── utils/         schemas · constants · helpers
-│                    + llm.py                    (provider factory, cache, retry)
-├── app/             + streamlit_app.py
-├── notebooks/         rag_experimentation · langgraph_flow_demo · evaluation_analysis
-├── tests/             test_routing · test_policy_check · test_refusal
-│                      test_rag_grounding · test_hitl_flow
-├── outputs/           drafted_replies · audit_logs · evaluation_reports
-│                    + approval_queue.jsonl · reviews.jsonl · customer_threads.db
-└── docs/              architecture.md · lld_notes.md · participant_guide.md
-                       evaluation_rubric.md · demo_script.md
-```
-
-`src/logging/` shadows a stdlib name — safe under Python 3's absolute imports, but the first
-place to look if an import ever behaves oddly. Gitignore `.chroma/` and `.cache/`; never commit
-the index.
 
 ---
 

@@ -30,3 +30,80 @@ guaranteed_context:
 # error and a bad reply.
 non_citable_policy_ids:
   - CON-010
+
+# --- P0: data the routers and the safety branch need. Preconditions proper arrive in P3. ---
+
+# Safety code -> internal queue. Every target appears in the golden set's
+# expected_escalation_target values; a different spelling scores as wrong even when the
+# decision was right. A contract with data/evaluation/, not a suggestion.
+safety_escalation_targets:
+  THREAT: Threat Response
+  SELF_HARM: Vulnerable Customer Support
+  CRISIS_OTHER: Vulnerable Customer Support
+  # The customer reporting exploitation of their OWN account. A dispute with elder-abuse
+  # screening under DSP-003, and visible -- they asked for help (TCK-1055).
+  FINANCIAL_ABUSE: Claims Specialist
+  STRUCTURING: BSA/AML
+  DISCRIMINATORY: Conduct Review
+  SEXUAL_CONTENT: Conduct Review
+  INDUCEMENT: Conduct Review
+  PROHIBITED_REQUEST: null
+  PROMPT_INJECTION: Conduct Review
+  # Asking to see an account they are not on. Refuse, and open a conduct file silently --
+  # the requester may be the person the account holder needs protecting from (TCK-1078).
+  THIRD_PARTY_ACCESS: Conduct Review
+
+# Escalations the reply must not mention. If a family member may be exploiting the customer,
+# "I've referred this to our Conduct Review team" warns exactly the wrong person.
+silent_escalation_codes:
+  - THIRD_PARTY_ACCESS
+
+# PROVISIONAL -- seeded from the golden set's confidence bands, fitted in P5.
+# ASK_MORE_INFO's floor is low on purpose: low confidence is a legitimate terminal state.
+route_confidence_floors:
+  AUTO_RESOLVE: 0.80
+  REFUSE: 0.75
+  ESCALATE: 0.55
+  ASK_MORE_INFO: 0.30
+
+# Policy thresholds, as data. Every number here comes from a clause in data/knowledge_base/ --
+# changing one must never mean editing a graph node.
+thresholds:
+  fee_reversal_window_days: 60        # FEE-001 condition 1 / FEE-006 boundary
+  new_account_days: 30                # FEE-003
+  specialist_review_amount: 2500      # DSP-003
+  specialist_review_dispute_count: 3  # DSP-003
+  # Regulation E covers consumer accounts. Telling a Small Business customer they have a
+  # Reg E claim is a substantive error, not a wording one.
+  reg_e_segments: [Consumer, Premier, Student]
+
+# Escalation queue by rule outcome. Spellings must match the golden set's
+# expected_escalation_target exactly, or a right decision scores as a wrong one.
+escalation_targets:
+  FEE-002: Service Recovery
+  FEE-006: Service Recovery
+  DSP-001: Claims Specialist
+  DSP-003: Claims Specialist
+  identity_unverified: null
+
+# Confidence composition (HLD D3). Provisional weights, fitted in P5 against the 107 bands.
+# Normalised at load, so editing one without rebalancing cannot push scores above 1.0.
+confidence_weights:
+  retrieval_strength: 0.30
+  clause_coverage: 0.25
+  precondition_determinacy: 0.20
+  route_agreement: 0.15
+  self_certainty: 0.10
+
+# The bands the golden set expects. P5's gate is the in-band rate across all four.
+route_confidence_bands:
+  AUTO_RESOLVE: [0.80, 1.00]
+  REFUSE: [0.75, 1.00]
+  ESCALATE: [0.55, 0.95]
+  ASK_MORE_INFO: [0.30, 0.70]
+
+# Case history as a routing signal (HLD 6). Pressure hardens routing; it never overrides it.
+thread_pressure:
+  # A thread escalated twice already does not go back to the queue that produced the outcome
+  # being complained about -- that is how a complaint becomes a regulatory filing.
+  escalated_thread_target: Executive Complaints

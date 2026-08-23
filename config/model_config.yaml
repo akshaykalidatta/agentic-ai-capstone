@@ -1,0 +1,50 @@
+# Everything that changes when you swap providers. None of it should touch a graph node.
+#
+# temperature: 0 everywhere, for two reasons: the cache is keyed on temperature, and at t>0 a
+# 2-point accuracy move is indistinguishable from sampling noise, which makes every P3/P5
+# tuning decision unfalsifiable.
+
+provider: groq
+
+# Two tiers, because using a 120B model to label sentiment is waste, not rigour.
+roles:
+  fast:
+    # Classification, intent extraction, query rewriting. Called ~3x per ticket.
+    model: llama-3.1-8b-instant
+    temperature: 0
+    max_tokens: 1024
+
+  reason:
+    # Policy analysis, routing, drafting, judges. The choice between these two stays open
+    # until P3 can measure hard-subset accuracy; swapping them is a one-line change here.
+    model: openai/gpt-oss-120b
+    fallback: llama-3.3-70b-versatile
+    temperature: 0
+    max_tokens: 2048
+
+  embed:
+    # Local -- Groq serves no embedding endpoint. Mirrors app_config.yaml for readability;
+    # src/utils/llm.py never reads it.
+    model: BAAI/bge-small-en-v1.5
+    local: true
+
+# A full 150-ticket run is ~600-900 calls, re-run dozens of times while tuning. Without a
+# cache, most of those re-ask a deterministic question you already have the answer to.
+cache:
+  enabled: true
+  dir: .cache/llm
+  # true = a miss raises instead of calling out. Proves an eval run touched no network.
+  offline: false
+
+# Free-tier 429s are routine. Retry with jitter; give up loudly.
+retry:
+  max_attempts: 5
+  initial_delay_seconds: 2
+  backoff_multiplier: 2.0
+  max_delay_seconds: 60
+  jitter: true
+  # Never 400/401 -- a bad key retried five times is five identical failures.
+  retry_on_status: [408, 429, 500, 502, 503, 504]
+
+# Per request. Generous: the 120B model on a free tier is not fast.
+timeout_seconds: 120
