@@ -15,3 +15,50 @@ PyYAML>=6.0
 
 # tests only
 pytest>=8.0
+
+# --- P0 (graph skeleton) ---
+
+# Orchestration. The brief requires conditional branching and loops; explicit state and
+# bounded cycles are the whole point here.
+langgraph>=0.2.0,<2.0
+
+# Input validation and the typed objects the graph passes around (src/utils/schemas.py).
+# langgraph depends on pydantic v2 anyway, but it is pinned explicitly because this project
+# relies on it directly and a transitive pin is not a contract.
+pydantic>=2.7,<3.0
+
+# Groq client. Imported lazily in src/utils/llm.py -- the graph runs end to end without it,
+# and without a GROQ_API_KEY, as long as no node makes a model call. That is true through P1.
+groq>=0.11,<1.0
+
+# --- P7 (human review) ---
+
+# Durable checkpoints. Interactive review suspends the graph inside `hitl_gate` via
+# `interrupt()`, and `memory` dies with the process -- with it, a paused review is unresumable
+# the moment Streamlit restarts, which is the one thing P7's gate tests.
+#
+# The `<3.0` cap that used to be here is what broke the first real install: langgraph resolved
+# to 1.x and langgraph-checkpoint to 4.x, the cap held THIS package on the 2.x line written
+# against checkpoint 2.x, and the two disagreed about `JsonPlusSerializer` -- 11 failures, all
+# `AttributeError: ... has no attribute 'dumps'`. A cap nobody can justify is worse than none:
+# it pinned one half of a pair that only ever ships in step with the other half.
+# `src/graph/checkpointing.py` makes the code work on either side of that split, so the cap has
+# no job left. Re-pin exactly once, from a green run: pip freeze | Select-String checkpoint
+langgraph-checkpoint-sqlite>=2.0
+
+# The review surface. Only `app/streamlit_app.py` imports it; nothing in src/ does, so the
+# 109 tests and every CLI path still run without it.
+streamlit>=1.36,<2.0
+
+# --- P8 (tracing) ---
+
+# Both imported lazily behind `observability.enabled` (default false) in src/utils/tracing.py.
+# LangGraph runs on LangChain callbacks, so the LangChain instrumentor captures every node,
+# model call and retrieval span with no per-node work.
+arize-phoenix>=5.0
+openinference-instrumentation-langchain>=0.1.29
+
+# --- deliberately NOT here ---
+# rank-bm25 / elasticsearch        not needed: src/retrieval/bm25.py is ~100 lines of stdlib,
+#                                  and keeping it dependency-free is what lets retrieval be
+#                                  evaluated on a machine with nothing installed.

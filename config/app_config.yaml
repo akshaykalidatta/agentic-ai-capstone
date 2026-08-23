@@ -35,6 +35,31 @@ retrieval:
     # spends ~120 of 480 tokens and makes sibling clauses look alike to the embedder.
     embed_scope_note: false
 
+  # Lexical half of hybrid retrieval. Pure Python, rebuilt at startup in ~10 ms, so there is
+  # no index to keep in sync -- it reads data/knowledge_base/ directly.
+  bm25:
+    enabled: true
+    # Score multiplier per chunk type. The 19 "decision quick reference" section chunks are
+    # keyword tables that match every query and crowd out the deciding clause. Measured on the
+    # 99 golden tickets with a policy (BM25 alone, k=5):
+    #   section 1.0 / scope 1.0 -> doc 0.870, clause 0.606, scope signal 0.625
+    #   section 0.3 / scope 0.6 -> doc 0.926, clause 0.690, scope signal 0.625
+    #   section 0.3 / scope 0.3 -> doc 0.926, clause 0.690, scope signal 0.000  <- the trap
+    # Move the two independently: damping scope too kills absence detection while the headline
+    # number still improves.
+    chunk_type_weights:
+      clause: 1.0
+      section: 0.3
+      scope: 0.6
+
+  fusion:
+    # Reciprocal Rank Fusion. Scale-free, so it does not need cosine and BM25 normalised onto
+    # a common scale -- it uses ranks only. 60 is the value from the original paper.
+    rrf_k: 60
+    # Both lists are over-fetched to this depth before fusing. A chunk at dense rank 40 that
+    # BM25 ranks 1st is exactly what hybrid exists to rescue, and it is invisible at pool=10.
+    candidate_pool: 30
+
   search:
     k: 5
     # Cosine similarity, not distance. Chroma is configured with hnsw:space=cosine, so
@@ -49,3 +74,58 @@ retrieval:
 
 logging:
   level: INFO
+
+# --- P0: topology and budget, not model behaviour ---
+
+graph:
+  # The three bounded cycles. Cap = total passes, so 2 = one retry. Every capped loop ends in
+  # ESCALATE. Raising a cap costs LLM calls linearly across 150 tickets: a budget, not a knob.
+  loop_caps:
+    retrieval_refine: 2
+    confidence_recheck: 2
+    draft_repair: 2
+    # A reviewer can send a draft back repeatedly. Same shape as the other three: the node
+    # forces the terminal state, the router only stops looping.
+    review_regeneration: 3
+
+  # Crash guard only; the loop caps above are the design. Longest legal path is ~22 nodes and
+  # a regeneration round-trip adds 3. If this trips, a router is wrong -- find it, don't raise.
+  recursion_limit: 40
+
+  # memory = dies with the process | sqlite = survives a restart | none
+  #
+  # `interactive` review REQUIRES sqlite and refuses to start on anything else, rather than
+  # forcing it silently -- a config that says `memory` while sqlite is what ran is a config
+  # that lies. Left on `memory` because batch runs do not need durability and a 150-ticket
+  # run should not leave a checkpoint database behind.
+  checkpointer: memory
+  sqlite_path: outputs/checkpoints.sqlite
+
+hitl:
+  # interactive | simulate | auto. Every reported metric must state which mode produced it.
+  mode: auto
+
+# --- P8: tracing. Metrics live in src/evaluation/ and are not affected by anything here.
+observability:
+  # Off by default and lazily imported: a missing or unreachable Phoenix must never be the
+  # reason a run fails, and the test suite passes without the package installed.
+  enabled: false
+  project_name: support-ticket-agent
+  # `phoenix serve` puts the UI on localhost:6006 and accepts OTLP/HTTP on the same port.
+  endpoint: http://localhost:6006/v1/traces
+
+run:
+  # Arrival order, single-threaded. A parallel queue would let a ticket be scored before its
+  # own predecessor is recorded, silently breaking the 4 escalating threads.
+  order: created_at
+  stop_on_error: false
+
+outputs:
+  audit_logs: outputs/audit_logs
+  drafted_replies: outputs/drafted_replies
+  evaluation_reports: outputs/evaluation_reports
+  approval_queue: outputs/approval_queue.jsonl
+  reviews: outputs/reviews.jsonl
+  # JSONL, not the .db in lld_notes.md 10: the store is append-only and a text file stays
+  # greppable. Flagged deviation -- see docs/p0_flow.md.
+  customer_threads: outputs/customer_threads.jsonl

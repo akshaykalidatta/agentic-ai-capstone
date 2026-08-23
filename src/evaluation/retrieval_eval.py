@@ -284,10 +284,41 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--sweep-k", type=str, default="")
     parser.add_argument("--show-failures", type=int, default=10)
     parser.add_argument("--no-save", action="store_true")
+    parser.add_argument(
+        "--engine",
+        choices=("hybrid", "dense", "bm25"),
+        default=None,
+        help="hybrid (default) | dense = P1's vector-only slice | bm25 = lexical only, "
+             "needs no index and no torch",
+    )
+    parser.add_argument(
+        "--compare",
+        action="store_true",
+        help="run all three engines and print them side by side -- the only honest way to "
+             "decide whether hybrid is earning its second index",
+    )
     args = parser.parse_args(argv)
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)-7s %(message)s")
-    retriever = build_default_retriever()
+
+    if args.compare:
+        print()
+        for engine in ("bm25", "dense", "hybrid"):
+            try:
+                rep = evaluate(
+                    build_default_retriever(engine=engine),
+                    k=args.k, similarity_floor=args.floor, limit=args.limit,
+                )
+            except Exception as exc:
+                print(f"  {engine:<8} unavailable: {exc}")
+                continue
+            print(f"  {engine:<8} doc={rep.doc_recall:.3f}  hard={rep.doc_recall_hard:.3f}  "
+                  f"clause={rep.clause_recall_dense:.3f}  full={rep.full_doc_hit_rate:.3f}  "
+                  f"absence={rep.absence_detected:.3f}  false_absence={rep.false_absence_rate:.3f}")
+        print()
+        return 0
+
+    retriever = build_default_retriever(engine=args.engine)
 
     if args.sweep_floor or args.sweep_k:
         floors = (
