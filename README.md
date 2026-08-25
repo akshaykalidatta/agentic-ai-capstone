@@ -1,154 +1,115 @@
 # Support Ticket Triage & Resolution Agent
 
-An agentic pipeline that reads a bank support ticket, finds the policy that governs it, decides
-what to do, drafts a reply, and hands the whole thing to a human. Nothing reaches a customer.
+A LangGraph agent that reads a bank support ticket, retrieves the policy clauses that govern it,
+decides whether to auto-resolve, escalate, refuse or ask for more information, drafts a reply,
+and routes the draft to a human reviewer. Nothing is sent to a customer.
 
-Fictional US retail bank (Northgate), 150 synthetic tickets, a 59-clause knowledge base, and a
-golden set that was built around specific failure modes rather than around easy wins.
+Built on a fictional US retail bank (Northgate): 150 synthetic tickets, a 59-clause markdown
+knowledge base, and a 107-ticket golden evaluation set.
 
----
+## Setup and running
 
-## Run it in two minutes, with nothing installed
+See **[`docs/setup_and_run.md`](docs/setup_and_run.md)**. It covers installation, the offline
+path that needs no API key, building the index, running the queue, the evaluation commands and
+the review app, in order.
 
-```bash
-pip install pydantic PyYAML pytest
+## The graph
 
-python -m src.main --gate                                    # every offline gate
-python -m src.main --ticket TCK-1143 --engine bm25 --no-model --walk -v
-python -m pytest tests/ -v                                   # 109 tests
+```mermaid
+flowchart TD
+    START([START]) --> triage
+    triage -.->|safety| safety_escalate
+    triage -.->|normal| preconditions
+    preconditions --> retrieve
+    retrieve --> analyse_policy
+    analyse_policy -.->|refine| refine_query
+    refine_query --> retrieve
+    analyse_policy -.->|route| route_decision
+    route_decision --> score_confidence
+    score_confidence -.->|reconsider| analyse_policy
+    score_confidence -.->|draft| draft_reply
+    draft_reply --> validate_draft
+    validate_draft -.->|repair| draft_reply
+    validate_draft -.->|review| hitl_gate
+    safety_escalate --> hitl_gate
+    hitl_gate -.->|regenerate| draft_reply
+    hitl_gate -.->|done| audit_log
+    audit_log --> END([END])
 ```
 
-`--no-model` runs the deterministic layers only; `--engine bm25` uses the lexical retriever,
-which needs no index and no torch; `--walk` executes the graph in plain Python. Between them,
-the whole pipeline runs on a bare checkout.
+### Nodes
 
-## Run it for real
-
-```bash
-pip install -r requirements.txt
-cp .env.example .env                     # then set GROQ_API_KEY=gsk_... (free tier is enough)
-
-python scripts/build_index.py            # ~84 chunks, a minute on CPU
-python -m src.main --sample              # the 13-ticket dev batch
-python -m src.main --all                 # the full queue, arrival order
-
-python -m src.evaluation.retrieval_eval --compare    # bm25 vs dense vs hybrid
-python -m src.evaluation.route_eval                  # route accuracy + critical errors
-python -m src.evaluation.report --latest --markdown  # everything, scored
-python -m src.logging.replay --latest --ticket TCK-1125
-```
-
-## Review it as a human
-
-Set `graph.checkpointer: sqlite` in `config/app_config.yaml` first — interactive review
-suspends the graph mid-run and refuses to start on a checkpointer that dies with the process.
-
-```bash
-python -m src.main --sample --hitl interactive   # each ticket stops at the review gate
-streamlit run app/streamlit_app.py               # the queue, the review screen, the metrics
-```
-
-`docs/human_review.md` explains the mechanic; `docs/demo_script.md` is a five-minute
-walkthrough. **P7's gate has not been run yet** — see `docs/pipeline.md` §8.
-
----
-
-## What it does, in one picture
-
-```
-triage ──safety──────────────────────────► safety_escalate ─┐
-   │                                                         │
-   └─normal─► preconditions ─► retrieve ─► analyse_policy ─► route_decision
-                                  ▲            │                   │
-                                  └─refine─────┘                   ▼
-                                                            score_confidence
-                                                                   │
-                              hitl_gate ◄── validate_draft ◄── draft_reply
-                                  │              └──repair───────┘
-                                  └─► audit_log
-```
-
-Three bounded loops (retrieval refinement, confidence recheck, draft repair), each capped and
-each ending in escalation, because a human is the only safe fallback. One branch: a
-safety-critical flag skips retrieval entirely, so a crisis reply can never be drafted with fee
-clauses sitting in the context window.
-
-Full detail: **[`docs/pipeline.md`](docs/pipeline.md)**.
-
----
-
-## Design decisions worth knowing before you read the code
-
-| | |
+| Node | What it does |
 | --- | --- |
-| **Clause-aware chunking** | One chunk per policy clause, not blind token windows. A window splits a clause from its own conditions, and groundedness becomes unmeasurable — the citation is right and the content is invented. |
-| **Preconditions computed in Python** | *"I don't think I've ever asked before"* reads identically whether the record says 0 prior reversals or 1, and those need opposite routes. Eligibility is arithmetic over fields, handed to the model as fact. |
-| **Composed confidence** | Five measurable signals, with the model's own opinion capped at 10%. A self-reported number never dips, and a number that never dips cannot drive a loop. |
-| **Two route proposals** | The rule engine and the model each propose one, independently. Their *disagreement* is the hard-case detector, and it costs nothing to label. |
-| **Route before draft** | Drafting first makes the draft the evidence for the route. On the 45 hard tickets that failure is near-total. |
+| `triage` | Deterministic safety patterns first, then one model call for sentiment, intent and entities. The model can add flags, never remove them. |
+| `preconditions` | Computes policy eligibility from the structured record. `met` is tri-state: `None` means not determinable, which drives ASK_MORE_INFO. |
+| `retrieve` | Hybrid retrieval: dense (Chroma + bge-small) and BM25, fused by Reciprocal Rank Fusion. Guaranteed clauses are injected on top of `k`. |
+| `refine_query` | Rebuilds the query when the retrieved clauses did not settle the question. |
+| `analyse_policy` | Separates clauses that decide the question from those that constrain wording. Drops any clause ID the model names that was not retrieved. |
+| `route_decision` | Reconciles two independent proposals, one from the rule engine and one from the model. Safety flags and unverified policy resolve to ESCALATE before the model is consulted. |
+| `score_confidence` | Five weighted signals, compared against the confidence floor for the chosen route. |
+| `draft_reply` | Route-specific drafting. The route is an input, so the draft is never the evidence for the route. |
+| `validate_draft` | Checks citations against what was retrieved and scans for prohibited content. Separates hallucinated citations from uncitable ones. |
+| `safety_escalate` | The bypass. Returns an empty context and a fixed reply with no model call, so a crisis disclosure cannot be drafted alongside fee clauses. Routes to ESCALATE, never REFUSE. |
+| `hitl_gate` | Every path passes through here. `auto` and `simulate` decide in code; `interactive` calls `interrupt()` and suspends the graph until a reviewer acts. |
+| `audit_log` | Writes the decision record, then updates case history. |
 
----
+### Branching and loops
 
-## Where things live
+One conditional branch leaves `triage`: a safety-critical flag goes straight to
+`safety_escalate`, skipping retrieval. The bypass rejoins before `hitl_gate`, never after.
+
+Three loops re-enter the graph. Each is capped in `config/app_config.yaml`, and each exits to
+escalation when the cap is reached.
+
+| Loop | Trigger | Cap | Exit when capped |
+| --- | --- | --- | --- |
+| `retrieval_refine` | No clause decides the question | 2 | `policy_verified` stays False, `route_decision` escalates |
+| `confidence_recheck` | Score below the route's floor | 2 | ESCALATE, or ASK_MORE_INFO if facts are missing |
+| `draft_repair` | Hallucinated citation or prohibited content | 2 | ESCALATE with a bare acknowledgement |
+
+A fourth counter, `review_regeneration` (cap 3), bounds how many times a reviewer can send a
+draft back for regeneration.
+
+### Topology as data
+
+`src/graph/edges.py` declares `EDGES`, `CONDITIONAL_EDGES`, `ROUTERS` and `LOOPS` as plain
+tables. `support_graph.build_graph()` loops over those tables to compile the LangGraph, and
+`walk_graph()` executes the same tables in plain Python with no langgraph import, which is how
+`tests/test_graph_topology.py` checks the topology and loop termination on a bare checkout.
+
+Two rules the routers follow:
+
+1. Routers choose, nodes write. A router takes state and returns a string and never mutates it.
+   When a loop hits its cap the node forces the route and the router only stops looping, so the
+   audit record and the path taken cannot disagree.
+2. Every branch maps every case. LangGraph has no default edge, so an unmapped return value
+   raises at runtime.
+
+## Repository layout
 
 ```
-config/           app_config · model_config · routing_rules   — every threshold is data
-data/             tickets · knowledge_base · evaluation       — hand-authored, validated
-app/
-  streamlit_app.py  the review surface                        — rendering only
+config/       app_config · model_config · routing_rules      every threshold is data
+data/         tickets · knowledge_base · evaluation
+app/          streamlit_app.py                               the review surface
 src/
-  main.py         CLI: run a batch, print the report, run the gates
-  graph/          graph_state · nodes · edges · support_graph
-  hitl/           reviewer_actions · approval_queue · review_service
-  agents/         base · triage · policy · response           — every model call
-  routing/        rules_engine · target_map · confidence · thread_pressure
-  safety/         policy_checker                              — deterministic patterns
-  retrieval/      loader · chunking · vector_store · bm25 · hybrid · retriever
-  memory/         customer_thread_store                       — case history across tickets
-  evaluation/     retrieval_eval · route_eval · evaluators · report
-  logging/        trace_logger · audit_logger · replay
-tests/            none needing an API key or an index
-docs/             architecture (HLD) · pipeline (how) · human_review (P7) · demo_script
+  main.py     CLI: run a batch, print the report, run the gates
+  graph/      graph_state · nodes · edges · support_graph · checkpointing
+  agents/     base · triage · policy · response               every model call
+  retrieval/  document_loader · chunking · vector_store · bm25 · hybrid · retriever
+  routing/    rules_engine · target_map · confidence · thread_pressure
+  safety/     policy_checker                                  deterministic patterns
+  hitl/       reviewer_actions · approval_queue · review_service
+  memory/     customer_thread_store                           case history across tickets
+  evaluation/ retrieval_eval · route_eval · evaluators · report
+  logging/    trace_logger · audit_logger · replay
+tests/
+notebooks/
 ```
 
----
+## Documentation
 
-## Measured status
-
-Everything here was run in this repo. Nothing is projected.
-
-| Gate | Result |
-| --- | --- |
-| P0 topology | **green** — 10 structural checks |
-| P1 doc recall@5, BM25 alone | **0.921** (gate 0.90), hard 0.937, false-absence 0.000 |
-| P1 dense / hybrid | **not measured** — needs `scripts/build_index.py` |
-| P2 safety-critical flagged | **2/2**, zero false positives across all 150 |
-| P2 tone traps not flagged | **6/6** |
-| P3 rule engine | fires on 20/150, **100% correct where it fires** |
-| P3 route accuracy, deterministic only | 0.447 overall, **0 critical errors** |
-| P4 citation integrity | **1.000** |
-| P5 confidence in-band | **0.851** (gate 0.70) |
-| P6 audit replayability | **150/150** |
-| P6 thread pressure | TCK-1125 lifts to Executive Complaints; TCK-1109 stays REFUSE |
-| P8 groundedness | 0.761 (gate 0.85) — retrieval-bound |
-| P8 no-policy handling | 0.625 — the 5 of 8 the scope signal reaches without a model |
-| P7 six reviewer actions | **6/6** over the real nodes and routers, each with its distinct effect |
-| **P7 restart durability** | **not yet run** — needs a real `langgraph-checkpoint-sqlite` |
-| Tests | **109 passing**, plus 22 cases in `tests/test_hitl.py` that have not been run |
-
-The deterministic 0.447 is a floor, not a disappointment: with no model there is no second
-route proposal, so every non-REFUSE ticket escalates. Safe, unhelpful, zero critical errors.
-
-## What is built but unverified
-
-P7 (the Streamlit review app) and Phoenix tracing are written, and everything reachable without
-the LangGraph runtime has been exercised — the six actions and the regeneration loop over the
-real nodes and routers, every review screen, the queue fold, the metrics. What is **not** proven
-is the part that needs a real install: `interrupt()` suspending inside LangGraph, `Command`
-resuming it, and a suspended review surviving a process restart on the sqlite checkpointer.
-Phoenix has never been run with `observability.enabled: true`.
-
-`docs/pipeline.md` §8 lists exactly what was checked and the three commands that close the gap.
-
-Also open: run the dense and hybrid retrieval gates, run `route_eval` with a key, and fit the
-confidence weights against the 107 golden bands.
+- [`docs/setup_and_run.md`](docs/setup_and_run.md) — installation and every command, in order.
+- [`docs/architecture.md`](docs/architecture.md) — the design: subsystem boundaries, the four
+  core decisions, the safety and memory models, and the evaluation strategy.
+- [`docs/demo_script.md`](docs/demo_script.md) — a five-minute walkthrough over six tickets.

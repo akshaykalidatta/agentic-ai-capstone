@@ -10,15 +10,17 @@ provider: groq
 roles:
   fast:
     # Classification, intent extraction, query rewriting. Called ~3x per ticket.
-    model: llama-3.1-8b-instant
+    # Was llama-3.1-8b-instant, which Groq retired for free and developer tiers on
+    # 2026-08-16. A retired model answers 404, not 401: the key is fine, the name is not.
+    model: openai/gpt-oss-20b
     temperature: 0
     max_tokens: 1024
 
   reason:
-    # Policy analysis, routing, drafting, judges. The choice between these two stays open
-    # until P3 can measure hard-subset accuracy; swapping them is a one-line change here.
+    # Policy analysis, routing, drafting, judges.
+    # Fallback was llama-3.3-70b-versatile, retired in the same round.
     model: openai/gpt-oss-120b
-    fallback: llama-3.3-70b-versatile
+    fallback: openai/gpt-oss-20b
     temperature: 0
     max_tokens: 2048
 
