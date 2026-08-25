@@ -98,7 +98,7 @@ graph:
   # forcing it silently -- a config that says `memory` while sqlite is what ran is a config
   # that lies. Left on `memory` because batch runs do not need durability and a 150-ticket
   # run should not leave a checkpoint database behind.
-  checkpointer: memory
+  checkpointer: sqlite
   sqlite_path: outputs/checkpoints.sqlite
 
 hitl:
