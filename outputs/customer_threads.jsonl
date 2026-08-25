@@ -1,0 +1,2 @@
+{"customer_id": "CUST-0001", "summary": {"ticket_id": "TCK-1143", "subject": "Overdraft fee from last Tuesday", "created_at": "2026-08-11T14:08:00-07:00", "disposition": "escalated", "route": "ESCALATE", "escalation_target": null}}
+{"customer_id": "CUST-0001", "summary": {"ticket_id": "TCK-1143", "subject": "Overdraft fee from last Tuesday", "created_at": "2026-08-11T14:08:00-07:00", "disposition": "escalated", "route": "ESCALATE", "escalation_target": "Claims Specialist"}}
